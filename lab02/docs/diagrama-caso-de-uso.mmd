@@ -1,0 +1,38 @@
+%%{init: {"flowchart": {"nodeSpacing": 35, "rankSpacing": 60}} }%%
+flowchart LR
+    Aluno([Aluno])
+    Professor([Professor])
+    Secretaria([Secretaria])
+    Cobrancas([Sistema de Cobranças])
+
+    subgraph SM["Sistema de Matrículas"]
+        UC1(Autenticar-se)
+        UC2(Consultar Disciplinas Ofertadas)
+        UC3(Matricular-se em Disciplinas)
+        UC4(Cancelar Matrícula)
+        UC5(Consultar Alunos Matriculados)
+        UC6(Gerenciar Cadastros Acadêmicos)
+        UC7(Gerar Currículo do Semestre)
+        UC8(Gerenciar Período de Matrículas)
+        UC9(Notificar Sistema de Cobranças)
+        UC10(Encerrar Inscrições da Disciplina)
+        UC11(Cancelar Disciplina por Baixa Adesão)
+    end
+
+    Aluno --> UC2
+    Aluno --> UC3
+    Aluno --> UC4
+    Professor --> UC5
+    Secretaria --> UC6
+    Secretaria --> UC7
+    Secretaria --> UC8
+
+    UC2 -. "«include»" .-> UC1
+    UC3 -. "«include»" .-> UC1
+    UC4 -. "«include»" .-> UC1
+    UC5 -. "«include»" .-> UC1
+
+    UC3 -. "«include»" .-> UC9
+    UC9 --> Cobrancas
+    UC3 -. "«extend»" .-> UC10
+    UC8 -. "«extend»" .-> UC11
