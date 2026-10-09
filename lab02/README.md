@@ -3,7 +3,7 @@
 Projeto da disciplina **Projeto de Software** (Engenharia de Software — PUC Minas),
 Laboratório 2, Segundo Semestre/2026.
 
-> Entrega atual: **Lab02S01** (Modelo de Análise — Diagrama de Caso de Uso e Histórias de Usuário).
+> Entrega atual: **Lab02S02** (Projeto Estrutural — Diagrama de Classes).
 
 ## Sobre o sistema
 
@@ -108,3 +108,26 @@ atores. Setas sólidas são associações ator↔caso de uso; setas tracejadas s
 
 16. Como sistema de cobranças, quero ser notificado sempre que um aluno se matricular em
     disciplinas, para gerar a cobrança correspondente ao semestre.
+
+## Diagrama de Classes
+
+![Diagrama de Classes do Sistema de Matrículas](docs/diagrama-classes.png)
+
+**Observações sobre o diagrama:**
+
+- `Usuario` é uma classe abstrata que concentra login/senha e autenticação; `Aluno`,
+  `Professor` e `Secretaria` herdam dela, já que os três atores autenticam-se do mesmo jeito.
+- `Curriculo` representa a grade de disciplinas ofertadas em um semestre, gerada pela
+  `Secretaria` (história de usuário 12).
+- `PeriodoMatriculas` controla a janela de abertura/encerramento das matrículas (histórias
+  13-15); ao encerrar, dispara as regras de mínimo de 3 e máximo de 60 alunos em `Disciplina`.
+- `Matricula` é a associação entre `Aluno` e `Disciplina`, carregando o tipo (obrigatória/
+  optativa) e o status; é ela quem notifica o `SistemaCobranca` (ator secundário do caso de
+  uso), representado aqui como classe apenas com o método de integração.
+- Os atributos e assinaturas de métodos aqui modelados são os que serão implementados como
+  stubs (métodos vazios) no projeto Java desta sprint.
+
+**Para editar este diagrama:** mesmo fluxo do diagrama de caso de uso — o fonte é
+[docs/diagrama-classes.mmd](docs/diagrama-classes.mmd) (sintaxe
+[Mermaid](https://mermaid.js.org/)). Edite o `.mmd` e cole em [mermaid.live](https://mermaid.live/)
+para visualizar/exportar o PNG novamente.

@@ -1,0 +1,128 @@
+classDiagram
+    direction TB
+
+    class Usuario {
+        <<abstract>>
+        -id: int
+        -nome: String
+        -login: String
+        -senha: String
+        +autenticar(senha: String) boolean
+    }
+
+    class Aluno {
+        -ra: String
+        +consultarDisciplinasOfertadas(curriculo: Curriculo) List~Disciplina~
+        +matricularEmDisciplina(disciplina: Disciplina, tipo: TipoMatricula) Matricula
+        +cancelarMatricula(matricula: Matricula) void
+    }
+
+    class Professor {
+        +consultarAlunosMatriculados(disciplina: Disciplina) List~Aluno~
+    }
+
+    class Secretaria {
+        +cadastrarCurso(curso: Curso) void
+        +cadastrarDisciplina(disciplina: Disciplina) void
+        +cadastrarProfessor(professor: Professor) void
+        +cadastrarAluno(aluno: Aluno) void
+        +gerarCurriculo(semestre: String) Curriculo
+        +definirPeriodoMatriculas(inicio: Date, fim: Date) PeriodoMatriculas
+        +encerrarPeriodoMatriculas(periodo: PeriodoMatriculas) void
+    }
+
+    class Curso {
+        -nome: String
+        -numeroCreditos: int
+        -disciplinas: List~Disciplina~
+        +adicionarDisciplina(disciplina: Disciplina) void
+        +removerDisciplina(disciplina: Disciplina) void
+    }
+
+    class Disciplina {
+        -nome: String
+        -codigo: String
+        -vagasMaximas: int
+        -vagasMinimas: int
+        -status: StatusDisciplina
+        -matriculas: List~Matricula~
+        +matricularAluno(aluno: Aluno, tipo: TipoMatricula) Matricula
+        +cancelarMatricula(matricula: Matricula) void
+        +possuiVagaDisponivel() boolean
+        +atingiuMinimoDeAlunos() boolean
+        +encerrarInscricoes() void
+        +ativarOuCancelar() void
+    }
+
+    class Curriculo {
+        -semestre: String
+        -disciplinasOfertadas: List~Disciplina~
+        +adicionarDisciplina(disciplina: Disciplina) void
+    }
+
+    class PeriodoMatriculas {
+        -dataInicio: Date
+        -dataFim: Date
+        -status: StatusPeriodo
+        +abrir() void
+        +encerrar() void
+        +estaAberto() boolean
+    }
+
+    class Matricula {
+        -aluno: Aluno
+        -disciplina: Disciplina
+        -tipo: TipoMatricula
+        -dataMatricula: Date
+        -status: StatusMatricula
+        +cancelar() void
+    }
+
+    class SistemaCobranca {
+        +notificarMatricula(matricula: Matricula) void
+    }
+
+    class TipoMatricula {
+        <<enumeration>>
+        OBRIGATORIA
+        OPTATIVA
+    }
+
+    class StatusDisciplina {
+        <<enumeration>>
+        ABERTA
+        ATIVA
+        CANCELADA
+    }
+
+    class StatusMatricula {
+        <<enumeration>>
+        ATIVA
+        CANCELADA
+    }
+
+    class StatusPeriodo {
+        <<enumeration>>
+        ABERTO
+        ENCERRADO
+    }
+
+    Usuario <|-- Aluno
+    Usuario <|-- Professor
+    Usuario <|-- Secretaria
+
+    Curso "1" o-- "*" Disciplina : possui
+    Professor "1" --> "*" Disciplina : leciona
+    Disciplina "1" *-- "*" Matricula : recebe
+    Aluno "1" --> "*" Matricula : realiza
+    Curriculo "1" o-- "*" Disciplina : oferece
+
+    Secretaria ..> Curso : cadastra
+    Secretaria ..> Curriculo : gera
+    Secretaria ..> PeriodoMatriculas : define
+    Matricula ..> SistemaCobranca : notifica
+
+    Disciplina --> StatusDisciplina
+    Matricula --> TipoMatricula
+    Matricula --> StatusMatricula
+    PeriodoMatriculas --> StatusPeriodo
