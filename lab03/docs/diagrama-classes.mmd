@@ -1,0 +1,90 @@
+classDiagram
+    direction TB
+
+    class Usuario {
+        <<abstract>>
+        -id: int
+        -nome: String
+        -login: String
+        -senha: String
+        +autenticar(senha: String) boolean
+    }
+
+    class Aluno {
+        -cpf: String
+        -rg: String
+        -endereco: String
+        -email: String
+        -curso: String
+        -saldoMoedas: int
+        +consultarExtrato() List~Transacao~
+        +resgatarVantagem(vantagem: Vantagem) Resgate
+    }
+
+    class Professor {
+        -cpf: String
+        -departamento: String
+        -saldoMoedas: int
+        +enviarMoedas(aluno: Aluno, quantidade: int, motivo: String) EnvioMoeda
+        +consultarExtrato() List~Transacao~
+        +receberCreditoSemestral() void
+    }
+
+    class EmpresaParceira {
+        -cnpj: String
+        -nomeFantasia: String
+        +cadastrarVantagem(vantagem: Vantagem) void
+    }
+
+    class Instituicao {
+        -nome: String
+        -endereco: String
+    }
+
+    class Vantagem {
+        -descricao: String
+        -foto: String
+        -custoEmMoedas: int
+    }
+
+    class Transacao {
+        <<abstract>>
+        -id: int
+        -data: Date
+        -valorEmMoedas: int
+    }
+
+    class EnvioMoeda {
+        -professor: Professor
+        -aluno: Aluno
+        -motivo: String
+    }
+
+    class Resgate {
+        -aluno: Aluno
+        -vantagem: Vantagem
+        -codigoCupom: String
+    }
+
+    class NotificacaoEmail {
+        +notificarRecebimentoMoeda(envio: EnvioMoeda) void
+        +notificarCupomResgate(resgate: Resgate) void
+        +notificarParceiro(resgate: Resgate) void
+    }
+
+    Usuario <|-- Aluno
+    Usuario <|-- Professor
+    Usuario <|-- EmpresaParceira
+    Transacao <|-- EnvioMoeda
+    Transacao <|-- Resgate
+
+    Instituicao "1" o-- "*" Aluno : matricula
+    Instituicao "1" o-- "*" Professor : emprega
+    EmpresaParceira "1" o-- "*" Vantagem : oferece
+    Aluno "1" --> "*" Resgate : resgata
+    Professor "1" --> "*" EnvioMoeda : envia
+    Aluno "1" --> "*" EnvioMoeda : recebe
+    Resgate "*" --> "1" Vantagem : refere-se a
+
+    EnvioMoeda ..> NotificacaoEmail : notifica
+    Resgate ..> NotificacaoEmail : notifica

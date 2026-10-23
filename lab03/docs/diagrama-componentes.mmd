@@ -1,0 +1,64 @@
+%%{init: {"flowchart": {"nodeSpacing": 35, "rankSpacing": 50}} }%%
+flowchart TB
+    subgraph Apresentacao["Camada de Apresentação (View)"]
+        WebAluno["«component»<br/>Interface Web - Aluno"]
+        WebProfessor["«component»<br/>Interface Web - Professor"]
+        WebEmpresa["«component»<br/>Interface Web - Empresa Parceira"]
+    end
+
+    subgraph Aplicacao["Camada de Aplicação (Controllers)"]
+        CtrlAuth["«component»<br/>ControladorAutenticacao"]
+        CtrlAluno["«component»<br/>ControladorAluno"]
+        CtrlProfessor["«component»<br/>ControladorProfessor"]
+        CtrlEmpresa["«component»<br/>ControladorEmpresaParceira"]
+        CtrlMoedas["«component»<br/>ControladorMoedas"]
+        CtrlVantagens["«component»<br/>ControladorVantagens"]
+    end
+
+    subgraph Dominio["Camada de Domínio (Services)"]
+        SrvMoedas["«component»<br/>ServicoMoedas"]
+        SrvVantagens["«component»<br/>ServicoVantagens"]
+        SrvNotificacao["«component»<br/>ServicoNotificacao"]
+    end
+
+    subgraph Persistencia["Camada de Persistência (DAO)"]
+        AlunoDAO["«component»<br/>AlunoDAO"]
+        ProfessorDAO["«component»<br/>ProfessorDAO"]
+        EmpresaDAO["«component»<br/>EmpresaParceiraDAO"]
+        TransacaoDAO["«component»<br/>TransacaoDAO"]
+        VantagemDAO["«component»<br/>VantagemDAO"]
+    end
+
+    BD[("Banco de Dados")]
+    SMTP(["Serviço de E-mail (SMTP)"])
+
+    WebAluno --> CtrlAuth
+    WebAluno --> CtrlAluno
+    WebAluno --> CtrlMoedas
+    WebAluno --> CtrlVantagens
+    WebProfessor --> CtrlAuth
+    WebProfessor --> CtrlProfessor
+    WebProfessor --> CtrlMoedas
+    WebEmpresa --> CtrlAuth
+    WebEmpresa --> CtrlEmpresa
+    WebEmpresa --> CtrlVantagens
+
+    CtrlAluno --> AlunoDAO
+    CtrlProfessor --> ProfessorDAO
+    CtrlEmpresa --> EmpresaDAO
+    CtrlMoedas --> SrvMoedas
+    CtrlVantagens --> SrvVantagens
+
+    SrvMoedas --> TransacaoDAO
+    SrvMoedas --> SrvNotificacao
+    SrvVantagens --> VantagemDAO
+    SrvVantagens --> TransacaoDAO
+    SrvVantagens --> SrvNotificacao
+
+    AlunoDAO --> BD
+    ProfessorDAO --> BD
+    EmpresaDAO --> BD
+    TransacaoDAO --> BD
+    VantagemDAO --> BD
+
+    SrvNotificacao --> SMTP
