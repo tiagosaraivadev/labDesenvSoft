@@ -1,0 +1,67 @@
+erDiagram
+    INSTITUICAO ||--o{ ALUNO : matricula
+    INSTITUICAO ||--o{ PROFESSOR : emprega
+    EMPRESA_PARCEIRA ||--o{ VANTAGEM : oferece
+    ALUNO ||--o{ TRANSACAO : participa
+    PROFESSOR ||--o{ TRANSACAO : envia
+    VANTAGEM ||--o{ TRANSACAO : resgatada_em
+
+    INSTITUICAO {
+        bigint id PK
+        varchar nome
+        varchar endereco
+    }
+
+    ALUNO {
+        bigint id PK
+        varchar nome
+        varchar login
+        varchar senha
+        varchar cpf
+        varchar rg
+        varchar endereco
+        varchar email
+        varchar curso
+        int saldo_moedas
+        bigint instituicao_id FK
+    }
+
+    PROFESSOR {
+        bigint id PK
+        varchar nome
+        varchar login
+        varchar senha
+        varchar cpf
+        varchar departamento
+        int saldo_moedas
+        bigint instituicao_id FK
+    }
+
+    EMPRESA_PARCEIRA {
+        bigint id PK
+        varchar nome
+        varchar login
+        varchar senha
+        varchar cnpj
+        varchar nome_fantasia
+    }
+
+    VANTAGEM {
+        bigint id PK
+        varchar descricao
+        varchar foto
+        int custo_em_moedas
+        bigint empresa_parceira_id FK
+    }
+
+    TRANSACAO {
+        bigint id PK
+        varchar tipo
+        date data
+        int valor_em_moedas
+        bigint aluno_id FK
+        bigint professor_id FK
+        varchar motivo
+        bigint vantagem_id FK
+        varchar codigo_cupom
+    }

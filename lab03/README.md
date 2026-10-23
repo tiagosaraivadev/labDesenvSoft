@@ -3,8 +3,8 @@
 Projeto da disciplina **Projeto de Software** (Engenharia de Software — PUC Minas),
 Laboratório 3, Segundo Semestre/2026.
 
-> Entrega atual: **Lab03S01** (Modelagem do sistema — Diagrama de Casos de Uso, Histórias
-> de Usuário, Diagrama de Classes e Diagrama de Componentes).
+> Entrega atual: **Lab03S02** (Modelo ER, estratégia de acesso ao banco de dados e CRUDs
+> iniciais de Aluno e Empresa Parceira).
 
 ## Sobre o sistema
 
@@ -156,3 +156,69 @@ para visualizar/exportar o PNG novamente.
 [docs/diagrama-componentes.mmd](docs/diagrama-componentes.mmd) (sintaxe
 [Mermaid](https://mermaid.js.org/)). Edite o `.mmd` e cole em [mermaid.live](https://mermaid.live/)
 para visualizar/exportar o PNG novamente.
+
+## Modelo ER
+
+![Modelo Entidade-Relacionamento do Sistema de Moeda Estudantil](docs/modelo-er.png)
+
+**Observações sobre o diagrama:**
+
+- `Aluno`, `Professor` e `EmpresaParceira` viram tabelas independentes (sem tabela
+  `USUARIO` compartilhada) — cada uma guarda suas próprias colunas de login/senha/nome,
+  para simplificar o mapeamento objeto-relacional nesta sprint.
+- `TRANSACAO` concentra envio de moedas e resgate de vantagem numa única tabela, com a
+  coluna `tipo` distinguindo os dois casos (`ENVIO`/`RESGATE`) — reflete a herança
+  `Transacao`→`EnvioMoeda`/`Resgate` do diagrama de classes, mapeada como herança de
+  tabela única (`SINGLE_TABLE`) no JPA.
+- `professor_id`, `motivo`, `vantagem_id` e `codigo_cupom` em `TRANSACAO` são nulos
+  dependendo do tipo (um envio não tem vantagem/cupom; um resgate não tem professor).
+
+**Para editar este diagrama:** mesmo fluxo dos demais — o fonte é
+[docs/modelo-er.mmd](docs/modelo-er.mmd) (sintaxe [Mermaid](https://mermaid.js.org/)).
+Edite o `.mmd` e cole em [mermaid.live](https://mermaid.live/) para visualizar/exportar o
+PNG novamente.
+
+## Estratégia de Persistência
+
+Projeto Java com **Spring Boot** em [app/](app/), usando:
+
+- **ORM**: Spring Data JPA + Hibernate — as entidades (`Aluno`, `Professor`,
+  `EmpresaParceira`, `Instituicao`, `Vantagem`, `Transacao`/`EnvioMoeda`/`Resgate`) ficam em
+  [app/src/main/java/br/puc/moedaestudantil/model](app/src/main/java/br/puc/moedaestudantil/model),
+  anotadas com `@Entity` e mapeadas para as tabelas do Modelo ER acima.
+- **Padrão DAO**: implementado pelas interfaces `Repository` (ex.:
+  [AlunoRepository](app/src/main/java/br/puc/moedaestudantil/repository/AlunoRepository.java)),
+  que estendem `JpaRepository` — o Spring Data gera a implementação do acesso a dados em
+  tempo de execução.
+- **Banco de dados**: H2 em arquivo (`app/data/moedaestudantil`), a opção mais simples para
+  rodar sem precisar instalar/configurar um servidor de banco separado. O console web do H2
+  (`/h2-console`) fica habilitado para inspecionar as tabelas durante a apresentação.
+- **Arquitetura MVC**: `Controller` (Spring MVC) → `Service` (regra de negócio) →
+  `Repository` (DAO/ORM) → banco; a View é renderizada em **Thymeleaf**, no próprio
+  Spring Boot (sem front-end separado nesta sprint).
+- Métodos do diagrama de classes que não fazem parte do CRUD desta sprint (`autenticar()`,
+  `consultarExtrato()`, `enviarMoedas()`, etc.) estão presentes como **stubs** nas
+  entidades, mantendo o alinhamento entre modelo e código.
+
+## CRUDs (versão inicial)
+
+Implementados nesta sprint, com tela (Thymeleaf) e persistência via back-end: **Aluno** e
+**Empresa Parceira** — criar, listar, editar e excluir. As demais entidades do domínio
+existem como tabelas/classes JPA (ver Modelo ER), mas ainda sem tela própria.
+
+## Como executar
+
+Pré-requisito: JDK 17+ instalado (`JAVA_HOME` configurado). O Maven é baixado
+automaticamente pelo Maven Wrapper, não precisa instalar nada além do JDK.
+
+```powershell
+cd lab03/app
+.\mvnw.cmd spring-boot:run
+```
+
+Depois, acesse:
+
+- http://localhost:8080/alunos — CRUD de Alunos
+- http://localhost:8080/empresas-parceiras — CRUD de Empresas Parceiras
+- http://localhost:8080/h2-console — console do banco H2 (JDBC URL:
+  `jdbc:h2:file:./data/moedaestudantil`, usuário `sa`, senha em branco)
