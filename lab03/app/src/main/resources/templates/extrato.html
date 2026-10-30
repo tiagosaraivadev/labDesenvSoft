@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Extrato</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav th:replace="~{fragments/layout :: nav}"></nav>
+
+    <h1>Extrato</h1>
+    <p>Saldo atual: <strong th:text="${saldoMoedas}"></strong> moedas</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Valor</th>
+                <th>Detalhes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="t : ${transacoes}" th:if="${t instanceof T(br.puc.moedaestudantil.model.EnvioMoeda)}">
+                <td th:text="${t.data}"></td>
+                <td>Recebimento de moeda</td>
+                <td th:text="'+' + ${t.valorEmMoedas}"></td>
+                <td th:if="${tipo == 'ALUNO'}"
+                    th:text="'De ' + ${t.professor.nome} + ' — ' + ${t.motivo}"></td>
+                <td th:if="${tipo == 'PROFESSOR'}"
+                    th:text="'Para ' + ${t.aluno.nome} + ' — ' + ${t.motivo}"></td>
+            </tr>
+            <tr th:each="t : ${transacoes}" th:if="${t instanceof T(br.puc.moedaestudantil.model.Resgate)}">
+                <td th:text="${t.data}"></td>
+                <td>Resgate de vantagem</td>
+                <td th:text="'-' + ${t.valorEmMoedas}"></td>
+                <td th:text="${t.vantagem.descricao} + ' (cupom ' + ${t.codigoCupom} + ')'"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${#lists.isEmpty(transacoes)}">Nenhuma transação ainda.</p>
+</body>
+</html>

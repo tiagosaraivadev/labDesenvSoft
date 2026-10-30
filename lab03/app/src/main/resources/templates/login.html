@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Entrar</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav th:replace="~{fragments/layout :: nav}"></nav>
+
+    <h1>Entrar</h1>
+
+    <p th:if="${erro}" style="color: #b00020;" th:text="${erro}"></p>
+
+    <form class="form-vertical" th:action="@{/login}" method="post">
+        <label for="login">Login</label>
+        <input type="text" id="login" name="login" required autofocus>
+
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" required>
+
+        <button type="submit">Entrar</button>
+    </form>
+
+    <p>
+        Ainda não tem conta?
+        <a href="/alunos/novo">Cadastrar-se como Aluno</a> ou
+        <a href="/empresas-parceiras/novo">como Empresa Parceira</a>.
+    </p>
+</body>
+</html>

@@ -30,11 +30,22 @@ public class AlunoController {
         return "alunos/list";
     }
 
+    // Rota pública: é o próprio fluxo de cadastro/entrada no sistema.
     @GetMapping("/novo")
     public String novoFormulario(Model model) {
         model.addAttribute("aluno", new Aluno());
         model.addAttribute("instituicoes", instituicaoRepository.findAll());
         return "alunos/form";
+    }
+
+    // Rota pública: cria um aluno novo (id sempre ignorado/zerado no service).
+    @PostMapping
+    public String cadastrar(@ModelAttribute Aluno aluno, @RequestParam(required = false) Long instituicaoId) {
+        if (instituicaoId != null) {
+            aluno.setInstituicao(instituicaoRepository.findById(instituicaoId).orElse(null));
+        }
+        alunoService.cadastrar(aluno);
+        return "redirect:/login";
     }
 
     @GetMapping("/{id}/editar")
@@ -44,12 +55,13 @@ public class AlunoController {
         return "alunos/form";
     }
 
-    @PostMapping
-    public String salvar(@ModelAttribute Aluno aluno, @RequestParam(required = false) Long instituicaoId) {
+    @PostMapping("/{id}/editar")
+    public String atualizar(@PathVariable Long id, @ModelAttribute Aluno aluno,
+            @RequestParam(required = false) Long instituicaoId) {
         if (instituicaoId != null) {
             aluno.setInstituicao(instituicaoRepository.findById(instituicaoId).orElse(null));
         }
-        alunoService.salvar(aluno);
+        alunoService.atualizar(id, aluno);
         return "redirect:/alunos";
     }
 

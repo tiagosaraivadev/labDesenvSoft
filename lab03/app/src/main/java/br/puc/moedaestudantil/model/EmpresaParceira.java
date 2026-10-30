@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @Entity
 public class EmpresaParceira {
@@ -19,12 +20,11 @@ public class EmpresaParceira {
     private String nomeFantasia;
 
     public boolean autenticar(String senha) {
-        // TODO: implementar validação de autenticação (fora do escopo da Sprint 2)
-        return false;
+        return this.senha != null && BCrypt.checkpw(senha, this.senha);
     }
 
     public void cadastrarVantagem(Vantagem vantagem) {
-        // TODO: implementar cadastro de vantagem (fora do escopo da Sprint 2)
+        vantagem.setEmpresaParceira(this);
     }
 
     public Long getId() {

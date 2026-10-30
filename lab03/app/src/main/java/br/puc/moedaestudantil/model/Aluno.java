@@ -6,7 +6,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @Entity
 public class Aluno {
@@ -30,18 +33,31 @@ public class Aluno {
     private Instituicao instituicao;
 
     public boolean autenticar(String senha) {
-        // TODO: implementar validação de autenticação (fora do escopo da Sprint 2)
-        return false;
+        return this.senha != null && BCrypt.checkpw(senha, this.senha);
     }
 
+    /**
+     * Consulta de extrato precisa acessar o banco (histórico de transações), o que uma
+     * entidade JPA simples não deve fazer. A implementação real fica em
+     * AlunoService.consultarExtrato(Aluno).
+     */
     public List<Transacao> consultarExtrato() {
-        // TODO: implementar consulta de extrato (fora do escopo da Sprint 2)
         return List.of();
     }
 
     public Resgate resgatarVantagem(Vantagem vantagem) {
-        // TODO: implementar resgate de vantagem (fora do escopo da Sprint 2)
-        return null;
+        if (vantagem.getCustoEmMoedas() > this.saldoMoedas) {
+            throw new SaldoInsuficienteException("Saldo de moedas insuficiente para resgatar esta vantagem.");
+        }
+        this.saldoMoedas -= vantagem.getCustoEmMoedas();
+
+        Resgate resgate = new Resgate();
+        resgate.setAluno(this);
+        resgate.setVantagem(vantagem);
+        resgate.setData(LocalDate.now());
+        resgate.setValorEmMoedas(vantagem.getCustoEmMoedas());
+        resgate.setCodigoCupom(UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        return resgate;
     }
 
     public Long getId() {

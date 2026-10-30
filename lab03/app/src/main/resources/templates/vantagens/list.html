@@ -9,6 +9,7 @@
     <nav th:replace="~{fragments/layout :: nav}"></nav>
 
     <h1>Vantagens</h1>
+    <p th:if="${erro}" style="color: #b00020;" th:text="${erro}"></p>
     <a class="btn" href="/vantagens/novo">+ Nova Vantagem</a>
 
     <table>
@@ -26,6 +27,11 @@
                 <td th:text="${vantagem.custoEmMoedas}"></td>
                 <td th:text="${vantagem.empresaParceira != null ? vantagem.empresaParceira.nomeFantasia : '-'}"></td>
                 <td class="acoes">
+                    <form th:if="${podeResgatar}" th:action="@{/vantagens/{id}/resgatar(id=${vantagem.id})}" method="post"
+                          onsubmit="return confirm('Resgatar esta vantagem por ' + this.dataset.custo + ' moedas?');"
+                          th:data-custo="${vantagem.custoEmMoedas}">
+                        <button type="submit">Resgatar</button>
+                    </form>
                     <a th:href="@{/vantagens/{id}/editar(id=${vantagem.id})}">Editar</a>
                     &nbsp;
                     <form th:action="@{/vantagens/{id}/excluir(id=${vantagem.id})}" method="post"

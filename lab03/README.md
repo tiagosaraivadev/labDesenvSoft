@@ -3,8 +3,8 @@
 Projeto da disciplina **Projeto de Software** (Engenharia de Software — PUC Minas),
 Laboratório 3, Segundo Semestre/2026.
 
-> Entrega atual: **Lab03S02** (Modelo ER, estratégia de acesso ao banco de dados e CRUDs
-> iniciais de Aluno e Empresa Parceira).
+> Entrega atual: **Lab03S03** (versão final — autenticação, fluxo de moedas, resgate de
+> vantagem, notificações por e-mail simuladas).
 
 ## Sobre o sistema
 
@@ -200,13 +200,15 @@ Projeto Java com **Spring Boot** em [app/](app/), usando:
   `consultarExtrato()`, `enviarMoedas()`, etc.) estão presentes como **stubs** nas
   entidades, mantendo o alinhamento entre modelo e código.
 
-## CRUDs (versão inicial)
+## CRUDs (versão final)
 
-Implementados: **Aluno**, **Empresa Parceira** e **Vantagem** — criar, listar, editar e
-excluir, com tela (Thymeleaf) e persistência via back-end. O cadastro de Aluno escolhe a
-Instituição numa lista pré-cadastrada (ver Dados de apoio abaixo); o cadastro de Vantagem
-escolhe a Empresa Parceira dona dela. As demais entidades do domínio existem como
-tabelas/classes JPA (ver Modelo ER), mas ainda sem tela própria.
+**Aluno**, **Empresa Parceira** e **Vantagem** — criar, listar, editar e excluir, com tela
+(Thymeleaf) e persistência via back-end. O cadastro de Aluno escolhe a Instituição numa
+lista pré-cadastrada; o cadastro de Vantagem é sempre vinculado à Empresa Parceira
+logada (não existe mais seleção manual). As demais entidades do domínio (Professor,
+Instituição, Transação) existem como tabelas/classes JPA, mas sem tela de CRUD própria —
+Professor e Instituição são pré-cadastrados (ver seed abaixo), e Transação é criada pelo
+próprio fluxo de negócio (envio de moeda / resgate), não por um formulário genérico.
 
 ## Dados de apoio (seed)
 
@@ -218,21 +220,54 @@ cadastrá-los pelo sistema. Por isso, em vez de tela de CRUD, uma classe
 inicialização do banco (só roda se a tabela de instituições estiver vazia, então não
 duplica em restarts seguintes).
 
-## Roteiro das regras de negócio ainda pendentes
+## Autenticação
 
-A Sprint 2 cobre o checklist do enunciado (Modelo ER, persistência, CRUDs iniciais), mas
-o domínio completo do Sistema de Moeda Estudantil tem mais regras de negócio a implementar
-até a entrega final (Sprint 03). Planejado em fases, para não misturar mudanças grandes:
+Login por sessão HTTP própria (sem Spring Security completo — só a dependência
+`spring-security-crypto` para hash de senha). Aluno, Professor e Empresa Parceira
+compartilham a mesma tela de login (`/login`); o sistema tenta achar o `login` nas três
+tabelas e confirma a senha com `BCrypt.checkpw(...)` (ver `Aluno`/`Professor`/
+`EmpresaParceira.autenticar(senha)`). Rotas protegidas por um `HandlerInterceptor`
+redirecionam para `/login` se ninguém estiver autenticado. **Cadastro de Aluno e de
+Empresa Parceira continuam públicos** (é o próprio fluxo de entrada no sistema) — pequeno
+ajuste em relação ao diagrama de casos de uso da Sprint 1, que modelou "Cadastrar-se"
+incluindo "Autenticar-se" (logicamente não dá pra exigir login antes de existir conta).
+Não há controle de permissão por papel além disso (qualquer um dos 3 tipos logado acessa
+as mesmas telas) — o enunciado pede só "login necessário para os requisitos", não RBAC.
 
-1. ~~Dados de apoio~~ — seed de Instituição/Professor + CRUD de Vantagem. ✅
-2. **Autenticação** — login por sessão (Aluno/Professor/EmpresaParceira), senha com hash
-   BCrypt, proteção das rotas que exigem login.
-3. **Fluxo de moedas** — Professor envia moedas a Aluno (valida saldo, motivo
-   obrigatório), crédito semestral de 1.000 moedas, extrato (Aluno e Professor).
-4. **Resgate de vantagem** — Aluno troca moedas por Vantagem, desconta saldo, gera código
-   de cupom.
-5. **Notificações por e-mail (simuladas via log)** — ao receber moeda e ao resgatar
-   vantagem (aluno + empresa parceira).
+## Fluxo de moedas
+
+Professor logado envia moedas a um Aluno em `/moedas/enviar`, informando quantidade e
+motivo (obrigatório). A regra de negócio (validar saldo, debitar/creditar, montar a
+transação) está em `Professor.enviarMoedas(...)`, modelada como no diagrama de classes;
+quem persiste tudo é o `MoedaService`. O crédito semestral de 1.000 moedas
+(`Professor.receberCreditoSemestral()`) já é aplicado no cadastro inicial (seed); não há
+agendador de verdade simulando a passagem de semestres nesta versão. Extrato (`/extrato`)
+mostra o saldo e o histórico — de recebimentos para o Aluno, de envios para o Professor.
+
+## Resgate de vantagem
+
+Aluno logado resgata uma Vantagem na própria listagem (`/vantagens`, botão "Resgatar").
+`Aluno.resgatarVantagem(...)` valida saldo suficiente, debita e gera o código do cupom
+(`UUID`); o `ResgateService` persiste e aciona as notificações.
+
+## Notificações por e-mail (simuladas)
+
+Sem SMTP configurado neste protótipo: `NotificacaoEmailService` registra no **log da
+aplicação** o que seria enviado (destinatário, assunto, corpo) ao receber moeda e ao
+resgatar vantagem (e-mail pro aluno + pro parceiro). Trocar por envio real é só
+implementar a mesma interface com um `JavaMailSender`.
+
+## Credenciais de teste
+
+Professores semeados pelo `DataSeeder` (senha antes do hash):
+
+| Login            | Senha  | Instituição |
+| ----------------- | ------ | ----------- |
+| `milena.adao`      | `123456` | PUC Minas   |
+| `carlos.andrade`   | `123456` | UFMG        |
+
+Alunos e Empresas Parceiras se cadastram pela própria tela de login (`/alunos/novo` e
+`/empresas-parceiras/novo`).
 
 ## Como executar
 
@@ -244,10 +279,14 @@ cd lab03/app
 .\mvnw.cmd spring-boot:run
 ```
 
-Depois, acesse:
+Depois, acesse http://localhost:8080/ — redireciona pra `/login` se ninguém estiver
+autenticado. A partir daí:
 
-- http://localhost:8080/alunos — CRUD de Alunos
-- http://localhost:8080/empresas-parceiras — CRUD de Empresas Parceiras
-- http://localhost:8080/vantagens — CRUD de Vantagens
+- Entrar com um professor semeado (ver Credenciais de teste) ou cadastrar um Aluno/Empresa
+  Parceira novo em `/alunos/novo` / `/empresas-parceiras/novo`.
+- http://localhost:8080/extrato — saldo e histórico (Aluno ou Professor logado).
+- http://localhost:8080/moedas/enviar — Professor envia moedas a um Aluno.
+- http://localhost:8080/vantagens — listar/cadastrar vantagens (Empresa Parceira) e
+  resgatar (Aluno).
 - http://localhost:8080/h2-console — console do banco H2 (JDBC URL:
-  `jdbc:h2:file:./data/moedaestudantil`, usuário `sa`, senha em branco)
+  `jdbc:h2:file:./data/moedaestudantil`, usuário `sa`, senha em branco).

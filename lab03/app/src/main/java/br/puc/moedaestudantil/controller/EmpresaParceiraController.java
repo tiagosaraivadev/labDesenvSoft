@@ -26,10 +26,18 @@ public class EmpresaParceiraController {
         return "empresas/list";
     }
 
+    // Rota pública: é o próprio fluxo de cadastro/entrada no sistema.
     @GetMapping("/novo")
     public String novoFormulario(Model model) {
         model.addAttribute("empresa", new EmpresaParceira());
         return "empresas/form";
+    }
+
+    // Rota pública: cria uma empresa parceira nova.
+    @PostMapping
+    public String cadastrar(@ModelAttribute EmpresaParceira empresa) {
+        empresaParceiraService.cadastrar(empresa);
+        return "redirect:/login";
     }
 
     @GetMapping("/{id}/editar")
@@ -38,9 +46,9 @@ public class EmpresaParceiraController {
         return "empresas/form";
     }
 
-    @PostMapping
-    public String salvar(@ModelAttribute EmpresaParceira empresa) {
-        empresaParceiraService.salvar(empresa);
+    @PostMapping("/{id}/editar")
+    public String atualizar(@PathVariable Long id, @ModelAttribute EmpresaParceira empresa) {
+        empresaParceiraService.atualizar(id, empresa);
         return "redirect:/empresas-parceiras";
     }
 

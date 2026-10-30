@@ -6,7 +6,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @Entity
 public class Professor {
@@ -27,22 +29,42 @@ public class Professor {
     private Instituicao instituicao;
 
     public boolean autenticar(String senha) {
-        // TODO: implementar validação de autenticação (fora do escopo da Sprint 2)
-        return false;
+        return this.senha != null && BCrypt.checkpw(senha, this.senha);
     }
 
     public EnvioMoeda enviarMoedas(Aluno aluno, int quantidade, String motivo) {
-        // TODO: implementar envio de moedas (fora do escopo da Sprint 2)
-        return null;
+        if (motivo == null || motivo.isBlank()) {
+            throw new IllegalArgumentException("O motivo do reconhecimento é obrigatório.");
+        }
+        if (quantidade <= 0) {
+            throw new IllegalArgumentException("A quantidade de moedas deve ser maior que zero.");
+        }
+        if (quantidade > this.saldoMoedas) {
+            throw new SaldoInsuficienteException("Saldo de moedas insuficiente para este envio.");
+        }
+        this.saldoMoedas -= quantidade;
+        aluno.setSaldoMoedas(aluno.getSaldoMoedas() + quantidade);
+
+        EnvioMoeda envio = new EnvioMoeda();
+        envio.setProfessor(this);
+        envio.setAluno(aluno);
+        envio.setMotivo(motivo);
+        envio.setData(LocalDate.now());
+        envio.setValorEmMoedas(quantidade);
+        return envio;
     }
 
+    /**
+     * Consulta de extrato precisa acessar o banco (histórico de transações), o que uma
+     * entidade JPA simples não deve fazer. A implementação real fica em
+     * ProfessorService.consultarExtrato(Professor).
+     */
     public List<Transacao> consultarExtrato() {
-        // TODO: implementar consulta de extrato (fora do escopo da Sprint 2)
         return List.of();
     }
 
     public void receberCreditoSemestral() {
-        // TODO: implementar crédito semestral acumulável (fora do escopo da Sprint 2)
+        this.saldoMoedas += 1000;
     }
 
     public Long getId() {
