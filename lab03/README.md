@@ -202,9 +202,37 @@ Projeto Java com **Spring Boot** em [app/](app/), usando:
 
 ## CRUDs (versão inicial)
 
-Implementados nesta sprint, com tela (Thymeleaf) e persistência via back-end: **Aluno** e
-**Empresa Parceira** — criar, listar, editar e excluir. As demais entidades do domínio
-existem como tabelas/classes JPA (ver Modelo ER), mas ainda sem tela própria.
+Implementados: **Aluno**, **Empresa Parceira** e **Vantagem** — criar, listar, editar e
+excluir, com tela (Thymeleaf) e persistência via back-end. O cadastro de Aluno escolhe a
+Instituição numa lista pré-cadastrada (ver Dados de apoio abaixo); o cadastro de Vantagem
+escolhe a Empresa Parceira dona dela. As demais entidades do domínio existem como
+tabelas/classes JPA (ver Modelo ER), mas ainda sem tela própria.
+
+## Dados de apoio (seed)
+
+O enunciado trata Instituição e Professor como **pré-cadastrados** (a instituição manda a
+lista de professores na parceria) — não há caso de uso para o aluno ou qualquer ator
+cadastrá-los pelo sistema. Por isso, em vez de tela de CRUD, uma classe
+[DataSeeder](app/src/main/java/br/puc/moedaestudantil/config/DataSeeder.java)
+(`CommandLineRunner`) popula 2 instituições e 2 professores de exemplo na primeira
+inicialização do banco (só roda se a tabela de instituições estiver vazia, então não
+duplica em restarts seguintes).
+
+## Roteiro das regras de negócio ainda pendentes
+
+A Sprint 2 cobre o checklist do enunciado (Modelo ER, persistência, CRUDs iniciais), mas
+o domínio completo do Sistema de Moeda Estudantil tem mais regras de negócio a implementar
+até a entrega final (Sprint 03). Planejado em fases, para não misturar mudanças grandes:
+
+1. ~~Dados de apoio~~ — seed de Instituição/Professor + CRUD de Vantagem. ✅
+2. **Autenticação** — login por sessão (Aluno/Professor/EmpresaParceira), senha com hash
+   BCrypt, proteção das rotas que exigem login.
+3. **Fluxo de moedas** — Professor envia moedas a Aluno (valida saldo, motivo
+   obrigatório), crédito semestral de 1.000 moedas, extrato (Aluno e Professor).
+4. **Resgate de vantagem** — Aluno troca moedas por Vantagem, desconta saldo, gera código
+   de cupom.
+5. **Notificações por e-mail (simuladas via log)** — ao receber moeda e ao resgatar
+   vantagem (aluno + empresa parceira).
 
 ## Como executar
 
@@ -220,5 +248,6 @@ Depois, acesse:
 
 - http://localhost:8080/alunos — CRUD de Alunos
 - http://localhost:8080/empresas-parceiras — CRUD de Empresas Parceiras
+- http://localhost:8080/vantagens — CRUD de Vantagens
 - http://localhost:8080/h2-console — console do banco H2 (JDBC URL:
   `jdbc:h2:file:./data/moedaestudantil`, usuário `sa`, senha em branco)

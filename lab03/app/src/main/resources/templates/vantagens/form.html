@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulário de Vantagem</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav th:replace="~{fragments/layout :: nav}"></nav>
+
+    <h1 th:text="${vantagem.id != null ? 'Editar Vantagem' : 'Nova Vantagem'}"></h1>
+
+    <form class="form-vertical" th:action="@{/vantagens}" th:object="${vantagem}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label for="descricao">Descrição</label>
+        <input type="text" id="descricao" th:field="*{descricao}" required>
+
+        <label for="foto">Foto (URL)</label>
+        <input type="text" id="foto" th:field="*{foto}" placeholder="https://...">
+
+        <label for="custoEmMoedas">Custo em Moedas</label>
+        <input type="number" id="custoEmMoedas" th:field="*{custoEmMoedas}" min="1" required>
+
+        <label for="empresaParceiraId">Empresa Parceira</label>
+        <select id="empresaParceiraId" name="empresaParceiraId" required>
+            <option value="">Selecione...</option>
+            <option th:each="empresa : ${empresas}"
+                    th:value="${empresa.id}"
+                    th:text="${empresa.nomeFantasia}"
+                    th:selected="${vantagem.empresaParceira != null and vantagem.empresaParceira.id == empresa.id}">
+            </option>
+        </select>
+
+        <button type="submit">Salvar</button>
+        <a class="btn" href="/vantagens">Cancelar</a>
+    </form>
+</body>
+</html>

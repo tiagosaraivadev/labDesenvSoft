@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vantagens</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav th:replace="~{fragments/layout :: nav}"></nav>
+
+    <h1>Vantagens</h1>
+    <a class="btn" href="/vantagens/novo">+ Nova Vantagem</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Descrição</th>
+                <th>Custo (moedas)</th>
+                <th>Empresa Parceira</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="vantagem : ${vantagens}">
+                <td th:text="${vantagem.descricao}"></td>
+                <td th:text="${vantagem.custoEmMoedas}"></td>
+                <td th:text="${vantagem.empresaParceira != null ? vantagem.empresaParceira.nomeFantasia : '-'}"></td>
+                <td class="acoes">
+                    <a th:href="@{/vantagens/{id}/editar(id=${vantagem.id})}">Editar</a>
+                    &nbsp;
+                    <form th:action="@{/vantagens/{id}/excluir(id=${vantagem.id})}" method="post"
+                          onsubmit="return confirm('Excluir esta vantagem?');">
+                        <button type="submit">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
