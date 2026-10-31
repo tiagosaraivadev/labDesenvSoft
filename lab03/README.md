@@ -5,6 +5,8 @@ Laboratório 3, Segundo Semestre/2026.
 
 > Entrega atual: **Lab03S03** (versão final — autenticação, fluxo de moedas, resgate de
 > vantagem, notificações por e-mail simuladas).
+>
+> Apresentação (arquitetura e tecnologias): [apresentacao.pdf](apresentacao.pdf).
 
 ## Sobre o sistema
 
