@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    actor E as Empresa Parceira
+    participant VC as VantagemController
+    participant ER as EmpresaParceiraRepository
+    participant Emp as EmpresaParceira (entidade)
+    participant VS as VantagemService
+    participant VR as VantagemRepository
+
+    E->>VC: POST /vantagens (descricao, foto, custoEmMoedas)
+    VC->>ER: findById(id da sessão)
+    ER-->>VC: empresa logada
+    alt sessão não é de empresa
+        VC-->>E: redirect /login
+    else empresa autenticada
+        VC->>Emp: cadastrarVantagem(vantagem)
+        Emp->>Emp: vantagem.empresaParceira = this
+        VC->>VS: salvar(vantagem)
+        VS->>VR: save(vantagem)
+        VC-->>E: redirect /vantagens
+    end

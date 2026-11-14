@@ -1,0 +1,30 @@
+sequenceDiagram
+    autonumber
+    actor U as Aluno ou Professor
+    participant AI as AuthInterceptor
+    participant XC as ExtratoController
+    participant S as Sessao
+    participant AS as AlunoService
+    participant PS as ProfessorService
+    participant R as EnvioMoeda/Resgate Repository
+
+    U->>AI: GET /extrato
+    AI->>S: sessão autenticada?
+    alt sem sessão
+        AI-->>U: redirect /login
+    else autenticado
+        AI->>XC: extrato()
+        XC->>S: getTipo() e getId()
+        alt tipo = ALUNO
+            XC->>AS: consultarExtrato(aluno)
+            AS->>R: findByAluno (envios e resgates)
+            R-->>AS: transações
+            AS-->>XC: lista ordenada por data desc
+        else tipo = PROFESSOR
+            XC->>PS: consultarExtrato(professor)
+            PS->>R: findByProfessor (envios)
+            R-->>PS: envios
+            PS-->>XC: lista ordenada por data desc
+        end
+        XC-->>U: extrato.html (saldo e transações)
+    end

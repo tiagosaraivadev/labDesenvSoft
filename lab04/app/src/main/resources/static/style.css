@@ -1,0 +1,41 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 16px;
+    color: #222;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+form.form-vertical label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+form.form-vertical input {
+    width: 100%;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.acoes form {
+    display: inline;
+}
+
+button, .btn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    cursor: pointer;
+}

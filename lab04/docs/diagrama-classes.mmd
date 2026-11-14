@@ -1,0 +1,103 @@
+classDiagram
+    direction TB
+
+    class Aluno {
+        -id: Long
+        -nome: String
+        -login: String
+        -senha: String
+        -cpf: String
+        -rg: String
+        -endereco: String
+        -email: String
+        -curso: String
+        -saldoMoedas: int
+        +autenticar(senha: String) boolean
+        +consultarExtrato() List~Transacao~
+        +resgatarVantagem(vantagem: Vantagem) Resgate
+    }
+
+    class Professor {
+        -id: Long
+        -nome: String
+        -login: String
+        -senha: String
+        -cpf: String
+        -departamento: String
+        -saldoMoedas: int
+        -semestreUltimoCredito: String
+        +autenticar(senha: String) boolean
+        +enviarMoedas(aluno: Aluno, quantidade: int, motivo: String) EnvioMoeda
+        +consultarExtrato() List~Transacao~
+        +receberCreditoSemestral() void
+    }
+
+    class EmpresaParceira {
+        -id: Long
+        -nome: String
+        -login: String
+        -senha: String
+        -cnpj: String
+        -nomeFantasia: String
+        +autenticar(senha: String) boolean
+        +cadastrarVantagem(vantagem: Vantagem) void
+    }
+
+    class Instituicao {
+        -id: Long
+        -nome: String
+        -endereco: String
+    }
+
+    class Vantagem {
+        -id: Long
+        -descricao: String
+        -foto: String
+        -custoEmMoedas: int
+    }
+
+    class Transacao {
+        <<abstract>>
+        -id: Long
+        -data: LocalDate
+        -valorEmMoedas: int
+    }
+
+    class EnvioMoeda {
+        -professor: Professor
+        -aluno: Aluno
+        -motivo: String
+    }
+
+    class Resgate {
+        -aluno: Aluno
+        -vantagem: Vantagem
+        -codigoCupom: String
+    }
+
+    class SaldoInsuficienteException {
+        <<exception>>
+    }
+
+    class NotificacaoEmailService {
+        <<service>>
+        +notificarRecebimentoMoeda(envio: EnvioMoeda) void
+        +notificarCupomResgate(resgate: Resgate) void
+        +notificarParceiro(resgate: Resgate) void
+    }
+
+    Transacao <|-- EnvioMoeda
+    Transacao <|-- Resgate
+
+    Instituicao "1" o-- "*" Aluno : matricula
+    Instituicao "1" o-- "*" Professor : emprega
+    EmpresaParceira "1" o-- "*" Vantagem : oferece
+    Aluno "1" --> "*" Resgate : resgata
+    Professor "1" --> "*" EnvioMoeda : envia
+    Aluno "1" --> "*" EnvioMoeda : recebe
+    Resgate "*" --> "1" Vantagem : refere-se a
+
+    Professor ..> SaldoInsuficienteException : lança
+    Aluno ..> SaldoInsuficienteException : lança
+    NotificacaoEmailService ..> EnvioMoeda : notifica
+    NotificacaoEmailService ..> Resgate : notifica

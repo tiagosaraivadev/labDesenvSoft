@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Enviar Moedas</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav th:replace="~{fragments/layout :: nav}"></nav>
+
+    <h1>Enviar Moedas</h1>
+    <p>Seu saldo atual: <strong th:text="${professor.saldoMoedas}"></strong> moedas</p>
+
+    <p th:if="${erro}" style="color: #b00020;" th:text="${erro}"></p>
+
+    <form class="form-vertical" th:action="@{/moedas/enviar}" method="post">
+        <label for="alunoId">Aluno</label>
+        <select id="alunoId" name="alunoId" required>
+            <option value="">Selecione...</option>
+            <option th:each="aluno : ${alunos}" th:value="${aluno.id}" th:text="${aluno.nome}"></option>
+        </select>
+
+        <label for="quantidade">Quantidade de moedas</label>
+        <input type="number" id="quantidade" name="quantidade" min="1" required>
+
+        <label for="motivo">Motivo (obrigatório)</label>
+        <input type="text" id="motivo" name="motivo" required>
+
+        <button type="submit">Enviar</button>
+        <a class="btn" href="/extrato">Cancelar</a>
+    </form>
+</body>
+</html>

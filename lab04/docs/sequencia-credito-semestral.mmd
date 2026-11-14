@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    participant T as Agendador (Scheduled / ApplicationReadyEvent)
+    participant CS as CreditoSemestralService
+    participant PR as ProfessorRepository
+    participant Prof as Professor (entidade)
+
+    T->>CS: creditarSemestreAtual()
+    CS->>CS: semestre = semestreAtual() (ex.: 2026-2)
+    CS->>PR: findAll()
+    PR-->>CS: professores
+    loop para cada professor
+        alt semestreUltimoCredito = semestre
+            CS->>CS: ignora (já creditado)
+        else semestre diferente
+            opt semestreUltimoCredito não nulo
+                CS->>Prof: receberCreditoSemestral()
+                Prof->>Prof: saldo += 1000 (acumula)
+            end
+            CS->>Prof: setSemestreUltimoCredito(semestre)
+            CS->>PR: save(professor)
+        end
+    end

@@ -1,0 +1,62 @@
+%%{init: {"flowchart": {"nodeSpacing": 35, "rankSpacing": 50}} }%%
+flowchart TB
+    subgraph Apresentacao["Camada de Apresentação (View - Thymeleaf)"]
+        Telas["«component»<br/>Templates HTML<br/>(login, alunos, empresas, vantagens, moedas, extrato)"]
+    end
+
+    subgraph Aplicacao["Camada de Aplicação (Controllers + Autenticação)"]
+        Auth["«component»<br/>AuthInterceptor / LoginController"]
+        CtrlAluno["«component»<br/>AlunoController"]
+        CtrlEmpresa["«component»<br/>EmpresaParceiraController"]
+        CtrlVantagem["«component»<br/>VantagemController"]
+        CtrlMoeda["«component»<br/>MoedaController"]
+        CtrlExtrato["«component»<br/>ExtratoController"]
+    end
+
+    subgraph Dominio["Camada de Domínio (Model + Services)"]
+        AuthSrv["«component»<br/>AuthService"]
+        AlunoSrv["«component»<br/>AlunoService"]
+        EmpresaSrv["«component»<br/>EmpresaParceiraService"]
+        VantagemSrv["«component»<br/>VantagemService"]
+        ProfSrv["«component»<br/>ProfessorService"]
+        MoedaSrv["«component»<br/>MoedaService"]
+        ResgateSrv["«component»<br/>ResgateService"]
+        NotifSrv["«component»<br/>NotificacaoEmailService"]
+    end
+
+    subgraph Persistencia["Camada de Persistência (Spring Data JPA - Repository/DAO)"]
+        Repos["«component»<br/>Aluno / Professor / EmpresaParceira / Instituicao /<br/>Vantagem / Transacao(EnvioMoeda, Resgate) Repository"]
+    end
+
+    BD[("H2 (arquivo)")]
+    Log(["Log da aplicação<br/>(e-mail simulado)"])
+
+    Telas --> Auth
+    Telas --> CtrlAluno
+    Telas --> CtrlEmpresa
+    Telas --> CtrlVantagem
+    Telas --> CtrlMoeda
+    Telas --> CtrlExtrato
+
+    Auth --> AuthSrv
+    CtrlAluno --> AlunoSrv
+    CtrlEmpresa --> EmpresaSrv
+    CtrlVantagem --> VantagemSrv
+    CtrlVantagem --> ResgateSrv
+    CtrlMoeda --> MoedaSrv
+    CtrlMoeda --> ProfSrv
+    CtrlExtrato --> AlunoSrv
+    CtrlExtrato --> ProfSrv
+
+    AuthSrv --> Repos
+    AlunoSrv --> Repos
+    EmpresaSrv --> Repos
+    VantagemSrv --> Repos
+    ProfSrv --> Repos
+    MoedaSrv --> Repos
+    ResgateSrv --> Repos
+    MoedaSrv --> NotifSrv
+    ResgateSrv --> NotifSrv
+
+    Repos --> BD
+    NotifSrv --> Log

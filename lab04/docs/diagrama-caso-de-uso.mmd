@@ -1,0 +1,33 @@
+%%{init: {"flowchart": {"nodeSpacing": 35, "rankSpacing": 60}} }%%
+flowchart LR
+    Aluno([Aluno])
+    Professor([Professor])
+    Empresa([Empresa Parceira])
+    Email([Serviço de E-mail])
+
+    subgraph SM["Sistema de Moeda Estudantil"]
+        UC1(Autenticar-se)
+        UC2(Cadastrar-se)
+        UC3(Enviar Moedas a Aluno)
+        UC4(Consultar Extrato)
+        UC5(Cadastrar Vantagem)
+        UC6(Resgatar Vantagem)
+        UC7(Notificar por E-mail)
+    end
+
+    Aluno --> UC2
+    Aluno --> UC4
+    Aluno --> UC6
+    Professor --> UC3
+    Professor --> UC4
+    Empresa --> UC5
+
+    UC2 -. "«include»" .-> UC1
+    UC3 -. "«include»" .-> UC1
+    UC4 -. "«include»" .-> UC1
+    UC5 -. "«include»" .-> UC1
+    UC6 -. "«include»" .-> UC1
+
+    UC3 -. "«include»" .-> UC7
+    UC6 -. "«include»" .-> UC7
+    UC7 --> Email

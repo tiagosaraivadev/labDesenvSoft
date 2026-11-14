@@ -1,0 +1,33 @@
+sequenceDiagram
+    autonumber
+    actor A as Aluno
+    participant VC as VantagemController
+    participant RS as ResgateService
+    participant AR as AlunoRepository
+    participant VR as VantagemRepository
+    participant Al as Aluno (entidade)
+    participant RR as ResgateRepository
+    participant N as NotificacaoEmailService
+    actor Em as Empresa Parceira (e-mail)
+
+    A->>VC: POST /vantagens/{id}/resgatar
+    VC->>RS: resgatar(alunoId, vantagemId)
+    RS->>AR: findById(alunoId)
+    RS->>VR: findById(vantagemId)
+    RS->>Al: resgatarVantagem(vantagem)
+    alt saldo insuficiente
+        Al--xRS: SaldoInsuficienteException
+        RS--xVC: exceção
+        VC-->>A: vantagens/list com mensagem de erro
+    else saldo suficiente
+        Al->>Al: saldo -= custo
+        Al->>Al: gera codigoCupom
+        Al-->>RS: Resgate
+        RS->>AR: save(aluno)
+        RS->>RR: save(resgate)
+        RS->>N: notificarCupomResgate(resgate)
+        N-->>A: e-mail com cupom (simulado em log)
+        RS->>N: notificarParceiro(resgate)
+        N-->>Em: e-mail com código para conferência (simulado em log)
+        VC-->>A: redirect /extrato
+    end

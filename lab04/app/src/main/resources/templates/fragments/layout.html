@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <nav th:fragment="nav" style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ccc;">
+        <strong>Sistema de Moeda Estudantil</strong>
+        &nbsp;|&nbsp;
+        <a href="/alunos">Alunos</a>
+        &nbsp;|&nbsp;
+        <a href="/empresas-parceiras">Empresas Parceiras</a>
+        &nbsp;|&nbsp;
+        <a href="/vantagens">Vantagens</a>
+        <span th:if="${logado}">
+            &nbsp;|&nbsp;
+            <a href="/extrato">Extrato</a>
+            <span th:if="${usuarioTipo == 'PROFESSOR'}">
+                &nbsp;|&nbsp;
+                <a href="/moedas/enviar">Enviar Moedas</a>
+            </span>
+        </span>
+        &nbsp;|&nbsp;
+        <span th:if="${logado}">
+            Olá, <span th:text="${usuarioNome}"></span>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit">Sair</button>
+            </form>
+        </span>
+        <span th:unless="${logado}">
+            <a href="/login">Entrar</a>
+        </span>
+    </nav>
+</body>
+</html>

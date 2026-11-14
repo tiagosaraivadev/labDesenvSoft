@@ -1,0 +1,27 @@
+%%{init: {"flowchart": {"nodeSpacing": 40, "rankSpacing": 50}} }%%
+flowchart TD
+    inicio((" ")) --> d1{{"Possui cadastro?"}}
+    d1 -- "não" --> ref1["<b>ref</b><br/>sd Cadastrar Aluno /<br/>sd Cadastrar Empresa Parceira"]
+    d1 -- "sim" --> ref2
+    ref1 --> ref2["<b>ref</b><br/>sd Autenticar"]
+    ref2 --> d2{{"Autenticado?"}}
+    d2 -- "não" --> ref2
+    d2 -- "sim" --> d3{{"Perfil do usuário"}}
+
+    d3 -- "Professor" --> d4{{"Ação do professor"}}
+    d4 -- "enviar moedas" --> ref3["<b>ref</b><br/>sd Enviar Moedas"]
+    d4 -- "ver extrato" --> ref4["<b>ref</b><br/>sd Consultar Extrato"]
+
+    d3 -- "Aluno" --> d5{{"Ação do aluno"}}
+    d5 -- "ver extrato" --> ref4
+    d5 -- "resgatar vantagem" --> ref5["<b>ref</b><br/>sd Resgatar Vantagem"]
+
+    d3 -- "Empresa Parceira" --> ref6["<b>ref</b><br/>sd Cadastrar Vantagem"]
+
+    ref3 --> fim1((("fim")))
+    ref4 --> fim1
+    ref5 --> fim1
+    ref6 --> fim1
+
+    agenda(("início de semestre")) --> ref7["<b>ref</b><br/>sd Crédito Semestral"]
+    ref7 --> fim2((("fim")))

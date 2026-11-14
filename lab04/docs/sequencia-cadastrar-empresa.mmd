@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    actor E as Empresa Parceira
+    participant V as empresas/form.html
+    participant AI as AuthInterceptor
+    participant EC as EmpresaParceiraController
+    participant ES as EmpresaParceiraService
+    participant ER as EmpresaParceiraRepository
+
+    E->>V: GET /empresas-parceiras/novo
+    V-->>E: formulário de cadastro
+    E->>V: preenche dados e envia
+    V->>AI: POST /empresas-parceiras
+    Note over AI: cadastro é rota pública
+    AI->>EC: cadastrar(empresa)
+    EC->>ES: cadastrar(empresa)
+    ES->>ES: senha = BCrypt(senha)
+    ES->>ER: save(empresa)
+    ER-->>ES: empresa persistida
+    EC-->>E: redirect /login

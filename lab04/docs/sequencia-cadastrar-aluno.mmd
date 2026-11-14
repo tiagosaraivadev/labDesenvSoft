@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    actor A as Aluno
+    participant V as alunos/form.html
+    participant AI as AuthInterceptor
+    participant AC as AlunoController
+    participant AS as AlunoService
+    participant IR as InstituicaoRepository
+    participant AR as AlunoRepository
+
+    A->>V: GET /alunos/novo
+    V->>AC: novo()
+    AC->>IR: findAll()
+    IR-->>AC: instituições pré-cadastradas
+    AC-->>A: formulário com lista de instituições
+    A->>V: preenche dados e envia
+    V->>AI: POST /alunos
+    Note over AI: cadastro é rota pública
+    AI->>AC: cadastrar(aluno, instituicaoId)
+    AC->>AS: cadastrar(aluno)
+    AS->>AS: saldo = 0 e senha = BCrypt(senha)
+    AS->>AR: save(aluno)
+    AR-->>AS: aluno persistido
+    AC-->>A: redirect /login

@@ -1,0 +1,32 @@
+sequenceDiagram
+    autonumber
+    actor P as Professor
+    participant MC as MoedaController
+    participant MS as MoedaService
+    participant PR as ProfessorRepository
+    participant AR as AlunoRepository
+    participant Prof as Professor (entidade)
+    participant ER as EnvioMoedaRepository
+    participant N as NotificacaoEmailService
+    actor Al as Aluno (e-mail)
+
+    P->>MC: POST /moedas/enviar (alunoId, quantidade, motivo)
+    MC->>MS: enviar(professorId, alunoId, quantidade, motivo)
+    MS->>PR: findById(professorId)
+    MS->>AR: findById(alunoId)
+    MS->>Prof: enviarMoedas(aluno, quantidade, motivo)
+    alt motivo vazio, quantidade inválida ou saldo insuficiente
+        Prof--xMS: IllegalArgumentException / SaldoInsuficienteException
+        MS--xMC: exceção
+        MC-->>P: moedas/enviar com mensagem de erro
+    else regras atendidas
+        Prof->>Prof: saldo -= quantidade
+        Prof->>Prof: aluno.saldo += quantidade
+        Prof-->>MS: EnvioMoeda
+        MS->>PR: save(professor)
+        MS->>AR: save(aluno)
+        MS->>ER: save(envio)
+        MS->>N: notificarRecebimentoMoeda(envio)
+        N-->>Al: e-mail de recebimento (simulado em log)
+        MC-->>P: redirect /extrato
+    end

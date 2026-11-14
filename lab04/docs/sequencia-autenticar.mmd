@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant V as login.html
+    participant LC as LoginController
+    participant AS as AuthService
+    participant R as Repository (Aluno/Professor/Empresa)
+    participant S as Sessao (HttpSession)
+
+    U->>V: informa login e senha
+    V->>LC: POST /login
+    LC->>AS: autenticar(login, senha)
+    AS->>R: findByLogin(login)
+    R-->>AS: entidade ou vazio
+    AS->>AS: entidade.autenticar(senha) (BCrypt)
+    alt credenciais válidas
+        AS-->>LC: UsuarioAutenticado(tipo, id, nome)
+        LC->>S: logar(tipo, id, nome)
+        LC-->>U: redirect /extrato
+    else inválidas
+        AS-->>LC: vazio
+        LC-->>U: login.html com erro
+    end
