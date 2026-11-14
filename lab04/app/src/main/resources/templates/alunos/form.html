@@ -10,6 +10,8 @@
 
     <h1 th:text="${aluno.id != null ? 'Editar Aluno' : 'Novo Aluno'}"></h1>
 
+    <p th:if="${erro}" style="color: #b00020;" th:text="${erro}"></p>
+
     <form class="form-vertical"
           th:action="${aluno.id != null} ? @{/alunos/{id}/editar(id=${aluno.id})} : @{/alunos}"
           th:object="${aluno}" method="post">

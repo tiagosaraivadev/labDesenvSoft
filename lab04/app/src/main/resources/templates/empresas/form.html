@@ -10,6 +10,8 @@
 
     <h1 th:text="${empresa.id != null ? 'Editar Empresa Parceira' : 'Nova Empresa Parceira'}"></h1>
 
+    <p th:if="${erro}" style="color: #b00020;" th:text="${erro}"></p>
+
     <form class="form-vertical"
           th:action="${empresa.id != null} ? @{/empresas-parceiras/{id}/editar(id=${empresa.id})} : @{/empresas-parceiras}"
           th:object="${empresa}" method="post">

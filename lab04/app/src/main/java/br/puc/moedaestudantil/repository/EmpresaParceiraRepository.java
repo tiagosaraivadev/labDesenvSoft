@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface EmpresaParceiraRepository extends JpaRepository<EmpresaParceira, Long> {
 
     Optional<EmpresaParceira> findByLogin(String login);
+
+    Optional<EmpresaParceira> findByCnpj(String cnpj);
 }

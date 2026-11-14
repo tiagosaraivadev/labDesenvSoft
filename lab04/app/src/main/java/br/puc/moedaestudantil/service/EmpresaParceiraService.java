@@ -11,10 +11,13 @@ public class EmpresaParceiraService {
 
     private final EmpresaParceiraRepository empresaParceiraRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UnicidadeCadastroService unicidadeCadastroService;
 
-    public EmpresaParceiraService(EmpresaParceiraRepository empresaParceiraRepository, PasswordEncoder passwordEncoder) {
+    public EmpresaParceiraService(EmpresaParceiraRepository empresaParceiraRepository, PasswordEncoder passwordEncoder,
+            UnicidadeCadastroService unicidadeCadastroService) {
         this.empresaParceiraRepository = empresaParceiraRepository;
         this.passwordEncoder = passwordEncoder;
+        this.unicidadeCadastroService = unicidadeCadastroService;
     }
 
     public List<EmpresaParceira> listarTodas() {
@@ -26,6 +29,7 @@ public class EmpresaParceiraService {
     }
 
     public EmpresaParceira cadastrar(EmpresaParceira empresaParceira) {
+        unicidadeCadastroService.validarEmpresa(empresaParceira, null);
         empresaParceira.setId(null);
         empresaParceira.setSenha(passwordEncoder.encode(empresaParceira.getSenha()));
         return empresaParceiraRepository.save(empresaParceira);
@@ -33,6 +37,7 @@ public class EmpresaParceiraService {
 
     public EmpresaParceira atualizar(Long id, EmpresaParceira dadosForm) {
         EmpresaParceira existente = empresaParceiraRepository.findById(id).orElseThrow();
+        unicidadeCadastroService.validarEmpresa(dadosForm, id);
         existente.setNome(dadosForm.getNome());
         existente.setLogin(dadosForm.getLogin());
         existente.setCnpj(dadosForm.getCnpj());

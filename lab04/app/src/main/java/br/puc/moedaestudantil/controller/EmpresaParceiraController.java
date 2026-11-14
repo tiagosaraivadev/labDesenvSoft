@@ -1,5 +1,6 @@
 package br.puc.moedaestudantil.controller;
 
+import br.puc.moedaestudantil.model.CadastroInvalidoException;
 import br.puc.moedaestudantil.model.EmpresaParceira;
 import br.puc.moedaestudantil.service.EmpresaParceiraService;
 import org.springframework.stereotype.Controller;
@@ -35,8 +36,12 @@ public class EmpresaParceiraController {
 
     // Rota pública: cria uma empresa parceira nova.
     @PostMapping
-    public String cadastrar(@ModelAttribute EmpresaParceira empresa) {
-        empresaParceiraService.cadastrar(empresa);
+    public String cadastrar(@ModelAttribute EmpresaParceira empresa, Model model) {
+        try {
+            empresaParceiraService.cadastrar(empresa);
+        } catch (CadastroInvalidoException e) {
+            return formularioComErro(empresa, e, model);
+        }
         return "redirect:/login";
     }
 
@@ -47,9 +52,20 @@ public class EmpresaParceiraController {
     }
 
     @PostMapping("/{id}/editar")
-    public String atualizar(@PathVariable Long id, @ModelAttribute EmpresaParceira empresa) {
-        empresaParceiraService.atualizar(id, empresa);
+    public String atualizar(@PathVariable Long id, @ModelAttribute EmpresaParceira empresa, Model model) {
+        try {
+            empresaParceiraService.atualizar(id, empresa);
+        } catch (CadastroInvalidoException e) {
+            empresa.setId(id);
+            return formularioComErro(empresa, e, model);
+        }
         return "redirect:/empresas-parceiras";
+    }
+
+    private String formularioComErro(EmpresaParceira empresa, CadastroInvalidoException e, Model model) {
+        model.addAttribute("empresa", empresa);
+        model.addAttribute("erro", e.getMessage());
+        return "empresas/form";
     }
 
     @PostMapping("/{id}/excluir")

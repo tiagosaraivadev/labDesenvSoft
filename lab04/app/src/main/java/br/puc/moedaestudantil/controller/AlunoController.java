@@ -1,6 +1,7 @@
 package br.puc.moedaestudantil.controller;
 
 import br.puc.moedaestudantil.model.Aluno;
+import br.puc.moedaestudantil.model.CadastroInvalidoException;
 import br.puc.moedaestudantil.repository.InstituicaoRepository;
 import br.puc.moedaestudantil.service.AlunoService;
 import org.springframework.stereotype.Controller;
@@ -40,11 +41,16 @@ public class AlunoController {
 
     // Rota pública: cria um aluno novo (id sempre ignorado/zerado no service).
     @PostMapping
-    public String cadastrar(@ModelAttribute Aluno aluno, @RequestParam(required = false) Long instituicaoId) {
+    public String cadastrar(@ModelAttribute Aluno aluno, @RequestParam(required = false) Long instituicaoId,
+            Model model) {
         if (instituicaoId != null) {
             aluno.setInstituicao(instituicaoRepository.findById(instituicaoId).orElse(null));
         }
-        alunoService.cadastrar(aluno);
+        try {
+            alunoService.cadastrar(aluno);
+        } catch (CadastroInvalidoException e) {
+            return formularioComErro(aluno, e, model);
+        }
         return "redirect:/login";
     }
 
@@ -57,12 +63,24 @@ public class AlunoController {
 
     @PostMapping("/{id}/editar")
     public String atualizar(@PathVariable Long id, @ModelAttribute Aluno aluno,
-            @RequestParam(required = false) Long instituicaoId) {
+            @RequestParam(required = false) Long instituicaoId, Model model) {
         if (instituicaoId != null) {
             aluno.setInstituicao(instituicaoRepository.findById(instituicaoId).orElse(null));
         }
-        alunoService.atualizar(id, aluno);
+        try {
+            alunoService.atualizar(id, aluno);
+        } catch (CadastroInvalidoException e) {
+            aluno.setId(id);
+            return formularioComErro(aluno, e, model);
+        }
         return "redirect:/alunos";
+    }
+
+    private String formularioComErro(Aluno aluno, CadastroInvalidoException e, Model model) {
+        model.addAttribute("aluno", aluno);
+        model.addAttribute("instituicoes", instituicaoRepository.findAll());
+        model.addAttribute("erro", e.getMessage());
+        return "alunos/form";
     }
 
     @PostMapping("/{id}/excluir")

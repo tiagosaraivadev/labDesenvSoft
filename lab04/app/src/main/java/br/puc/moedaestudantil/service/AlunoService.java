@@ -18,13 +18,16 @@ public class AlunoService {
     private final EnvioMoedaRepository envioMoedaRepository;
     private final ResgateRepository resgateRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UnicidadeCadastroService unicidadeCadastroService;
 
     public AlunoService(AlunoRepository alunoRepository, EnvioMoedaRepository envioMoedaRepository,
-            ResgateRepository resgateRepository, PasswordEncoder passwordEncoder) {
+            ResgateRepository resgateRepository, PasswordEncoder passwordEncoder,
+            UnicidadeCadastroService unicidadeCadastroService) {
         this.alunoRepository = alunoRepository;
         this.envioMoedaRepository = envioMoedaRepository;
         this.resgateRepository = resgateRepository;
         this.passwordEncoder = passwordEncoder;
+        this.unicidadeCadastroService = unicidadeCadastroService;
     }
 
     /**
@@ -49,6 +52,7 @@ public class AlunoService {
     }
 
     public Aluno cadastrar(Aluno aluno) {
+        unicidadeCadastroService.validarAluno(aluno, null);
         aluno.setId(null);
         // Saldo nunca vem do formulário de cadastro — só muda via enviarMoedas()/
         // resgatarVantagem(), para não dar brecha de um aluno se auto-creditar moedas.
@@ -59,6 +63,7 @@ public class AlunoService {
 
     public Aluno atualizar(Long id, Aluno dadosForm) {
         Aluno existente = alunoRepository.findById(id).orElseThrow();
+        unicidadeCadastroService.validarAluno(dadosForm, id);
         existente.setNome(dadosForm.getNome());
         existente.setLogin(dadosForm.getLogin());
         existente.setCpf(dadosForm.getCpf());

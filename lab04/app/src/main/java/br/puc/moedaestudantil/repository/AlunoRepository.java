@@ -7,4 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AlunoRepository extends JpaRepository<Aluno, Long> {
 
     Optional<Aluno> findByLogin(String login);
+
+    Optional<Aluno> findByCpf(String cpf);
+
+    Optional<Aluno> findByEmail(String email);
 }
