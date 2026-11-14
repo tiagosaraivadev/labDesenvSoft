@@ -1,5 +1,6 @@
 package br.puc.moedaestudantil.service;
 
+import br.puc.moedaestudantil.model.CadastroInvalidoException;
 import br.puc.moedaestudantil.model.Vantagem;
 import br.puc.moedaestudantil.repository.VantagemRepository;
 import java.util.List;
@@ -23,6 +24,9 @@ public class VantagemService {
     }
 
     public Vantagem salvar(Vantagem vantagem) {
+        if (vantagem.getCustoEmMoedas() <= 0) {
+            throw new CadastroInvalidoException("O custo da vantagem deve ser maior que zero.");
+        }
         return vantagemRepository.save(vantagem);
     }
 

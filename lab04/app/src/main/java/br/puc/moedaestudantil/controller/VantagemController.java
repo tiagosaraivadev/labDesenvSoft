@@ -1,6 +1,7 @@
 package br.puc.moedaestudantil.controller;
 
 import br.puc.moedaestudantil.auth.Sessao;
+import br.puc.moedaestudantil.model.CadastroInvalidoException;
 import br.puc.moedaestudantil.model.EmpresaParceira;
 import br.puc.moedaestudantil.model.SaldoInsuficienteException;
 import br.puc.moedaestudantil.model.Vantagem;
@@ -55,25 +56,34 @@ public class VantagemController {
     }
 
     @PostMapping
-    public String cadastrar(@ModelAttribute Vantagem vantagem, HttpServletRequest request) {
+    public String cadastrar(@ModelAttribute Vantagem vantagem, HttpServletRequest request, Model model) {
         EmpresaParceira empresa = empresaLogada(request);
         if (empresa == null) {
             return "redirect:/login";
         }
         empresa.cadastrarVantagem(vantagem);
-        vantagemService.salvar(vantagem);
+        try {
+            vantagemService.salvar(vantagem);
+        } catch (CadastroInvalidoException e) {
+            return formularioComErro(vantagem, e, model);
+        }
         return "redirect:/vantagens";
     }
 
     @PostMapping("/{id}/editar")
-    public String atualizar(@PathVariable Long id, @ModelAttribute Vantagem vantagem, HttpServletRequest request) {
+    public String atualizar(@PathVariable Long id, @ModelAttribute Vantagem vantagem, HttpServletRequest request,
+            Model model) {
         Vantagem existente = vantagemService.buscarPorId(id);
         if (!pertenceAoLogado(existente, request)) {
             return "redirect:/vantagens";
         }
         vantagem.setId(id);
         vantagem.setEmpresaParceira(existente.getEmpresaParceira());
-        vantagemService.salvar(vantagem);
+        try {
+            vantagemService.salvar(vantagem);
+        } catch (CadastroInvalidoException e) {
+            return formularioComErro(vantagem, e, model);
+        }
         return "redirect:/vantagens";
     }
 
@@ -94,13 +104,19 @@ public class VantagemController {
         Long alunoId = Sessao.getId(request.getSession(false));
         try {
             resgateService.resgatar(alunoId, id);
-        } catch (SaldoInsuficienteException e) {
+        } catch (SaldoInsuficienteException | IllegalArgumentException e) {
             model.addAttribute("erro", e.getMessage());
             model.addAttribute("vantagens", vantagemService.listarTodas());
             model.addAttribute("podeResgatar", true);
             return "vantagens/list";
         }
         return "redirect:/extrato";
+    }
+
+    private String formularioComErro(Vantagem vantagem, CadastroInvalidoException e, Model model) {
+        model.addAttribute("vantagem", vantagem);
+        model.addAttribute("erro", e.getMessage());
+        return "vantagens/form";
     }
 
     private EmpresaParceira empresaLogada(HttpServletRequest request) {

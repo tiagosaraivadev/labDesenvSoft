@@ -46,6 +46,9 @@ public class Aluno {
     }
 
     public Resgate resgatarVantagem(Vantagem vantagem) {
+        if (vantagem.getCustoEmMoedas() <= 0) {
+            throw new IllegalArgumentException("Esta vantagem possui um custo inválido e não pode ser resgatada.");
+        }
         if (vantagem.getCustoEmMoedas() > this.saldoMoedas) {
             throw new SaldoInsuficienteException("Saldo de moedas insuficiente para resgatar esta vantagem.");
         }
