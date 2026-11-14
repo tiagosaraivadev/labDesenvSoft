@@ -1,64 +1,62 @@
 %%{init: {"flowchart": {"nodeSpacing": 35, "rankSpacing": 50}} }%%
 flowchart TB
-    subgraph Apresentacao["Camada de Apresentação (View)"]
-        WebAluno["«component»<br/>Interface Web - Aluno"]
-        WebProfessor["«component»<br/>Interface Web - Professor"]
-        WebEmpresa["«component»<br/>Interface Web - Empresa Parceira"]
+    subgraph Apresentacao["Camada de Apresentação (View - Thymeleaf)"]
+        Telas["«component»<br/>Templates HTML<br/>(login, alunos, empresas, vantagens, moedas, extrato)"]
     end
 
-    subgraph Aplicacao["Camada de Aplicação (Controllers)"]
-        CtrlAuth["«component»<br/>ControladorAutenticacao"]
-        CtrlAluno["«component»<br/>ControladorAluno"]
-        CtrlProfessor["«component»<br/>ControladorProfessor"]
-        CtrlEmpresa["«component»<br/>ControladorEmpresaParceira"]
-        CtrlMoedas["«component»<br/>ControladorMoedas"]
-        CtrlVantagens["«component»<br/>ControladorVantagens"]
+    subgraph Aplicacao["Camada de Aplicação (Controllers + Autenticação)"]
+        Auth["«component»<br/>AuthInterceptor / LoginController"]
+        CtrlAluno["«component»<br/>AlunoController"]
+        CtrlEmpresa["«component»<br/>EmpresaParceiraController"]
+        CtrlVantagem["«component»<br/>VantagemController"]
+        CtrlMoeda["«component»<br/>MoedaController"]
+        CtrlExtrato["«component»<br/>ExtratoController"]
     end
 
-    subgraph Dominio["Camada de Domínio (Services)"]
-        SrvMoedas["«component»<br/>ServicoMoedas"]
-        SrvVantagens["«component»<br/>ServicoVantagens"]
-        SrvNotificacao["«component»<br/>ServicoNotificacao"]
+    subgraph Dominio["Camada de Domínio (Model + Services)"]
+        AuthSrv["«component»<br/>AuthService"]
+        AlunoSrv["«component»<br/>AlunoService"]
+        EmpresaSrv["«component»<br/>EmpresaParceiraService"]
+        VantagemSrv["«component»<br/>VantagemService"]
+        ProfSrv["«component»<br/>ProfessorService"]
+        MoedaSrv["«component»<br/>MoedaService"]
+        ResgateSrv["«component»<br/>ResgateService"]
+        NotifSrv["«component»<br/>NotificacaoEmailService"]
     end
 
-    subgraph Persistencia["Camada de Persistência (DAO)"]
-        AlunoDAO["«component»<br/>AlunoDAO"]
-        ProfessorDAO["«component»<br/>ProfessorDAO"]
-        EmpresaDAO["«component»<br/>EmpresaParceiraDAO"]
-        TransacaoDAO["«component»<br/>TransacaoDAO"]
-        VantagemDAO["«component»<br/>VantagemDAO"]
+    subgraph Persistencia["Camada de Persistência (Spring Data JPA - Repository/DAO)"]
+        Repos["«component»<br/>Aluno / Professor / EmpresaParceira / Instituicao /<br/>Vantagem / Transacao(EnvioMoeda, Resgate) Repository"]
     end
 
-    BD[("Banco de Dados")]
-    SMTP(["Serviço de E-mail (SMTP)"])
+    BD[("H2 (arquivo)")]
+    Log(["Log da aplicação<br/>(e-mail simulado)"])
 
-    WebAluno --> CtrlAuth
-    WebAluno --> CtrlAluno
-    WebAluno --> CtrlMoedas
-    WebAluno --> CtrlVantagens
-    WebProfessor --> CtrlAuth
-    WebProfessor --> CtrlProfessor
-    WebProfessor --> CtrlMoedas
-    WebEmpresa --> CtrlAuth
-    WebEmpresa --> CtrlEmpresa
-    WebEmpresa --> CtrlVantagens
+    Telas --> Auth
+    Telas --> CtrlAluno
+    Telas --> CtrlEmpresa
+    Telas --> CtrlVantagem
+    Telas --> CtrlMoeda
+    Telas --> CtrlExtrato
 
-    CtrlAluno --> AlunoDAO
-    CtrlProfessor --> ProfessorDAO
-    CtrlEmpresa --> EmpresaDAO
-    CtrlMoedas --> SrvMoedas
-    CtrlVantagens --> SrvVantagens
+    Auth --> AuthSrv
+    CtrlAluno --> AlunoSrv
+    CtrlEmpresa --> EmpresaSrv
+    CtrlVantagem --> VantagemSrv
+    CtrlVantagem --> ResgateSrv
+    CtrlMoeda --> MoedaSrv
+    CtrlMoeda --> ProfSrv
+    CtrlExtrato --> AlunoSrv
+    CtrlExtrato --> ProfSrv
 
-    SrvMoedas --> TransacaoDAO
-    SrvMoedas --> SrvNotificacao
-    SrvVantagens --> VantagemDAO
-    SrvVantagens --> TransacaoDAO
-    SrvVantagens --> SrvNotificacao
+    AuthSrv --> Repos
+    AlunoSrv --> Repos
+    EmpresaSrv --> Repos
+    VantagemSrv --> Repos
+    ProfSrv --> Repos
+    MoedaSrv --> Repos
+    ResgateSrv --> Repos
+    MoedaSrv --> NotifSrv
+    ResgateSrv --> NotifSrv
 
-    AlunoDAO --> BD
-    ProfessorDAO --> BD
-    EmpresaDAO --> BD
-    TransacaoDAO --> BD
-    VantagemDAO --> BD
-
-    SrvNotificacao --> SMTP
+    Repos --> BD
+    NotifSrv --> Log

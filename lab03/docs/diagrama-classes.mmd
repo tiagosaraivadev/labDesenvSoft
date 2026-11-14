@@ -1,47 +1,55 @@
 classDiagram
     direction TB
 
-    class Usuario {
-        <<abstract>>
-        -id: int
+    class Aluno {
+        -id: Long
         -nome: String
         -login: String
         -senha: String
-        +autenticar(senha: String) boolean
-    }
-
-    class Aluno {
         -cpf: String
         -rg: String
         -endereco: String
         -email: String
         -curso: String
         -saldoMoedas: int
+        +autenticar(senha: String) boolean
         +consultarExtrato() List~Transacao~
         +resgatarVantagem(vantagem: Vantagem) Resgate
     }
 
     class Professor {
+        -id: Long
+        -nome: String
+        -login: String
+        -senha: String
         -cpf: String
         -departamento: String
         -saldoMoedas: int
+        +autenticar(senha: String) boolean
         +enviarMoedas(aluno: Aluno, quantidade: int, motivo: String) EnvioMoeda
         +consultarExtrato() List~Transacao~
         +receberCreditoSemestral() void
     }
 
     class EmpresaParceira {
+        -id: Long
+        -nome: String
+        -login: String
+        -senha: String
         -cnpj: String
         -nomeFantasia: String
+        +autenticar(senha: String) boolean
         +cadastrarVantagem(vantagem: Vantagem) void
     }
 
     class Instituicao {
+        -id: Long
         -nome: String
         -endereco: String
     }
 
     class Vantagem {
+        -id: Long
         -descricao: String
         -foto: String
         -custoEmMoedas: int
@@ -49,8 +57,8 @@ classDiagram
 
     class Transacao {
         <<abstract>>
-        -id: int
-        -data: Date
+        -id: Long
+        -data: LocalDate
         -valorEmMoedas: int
     }
 
@@ -66,15 +74,17 @@ classDiagram
         -codigoCupom: String
     }
 
-    class NotificacaoEmail {
+    class SaldoInsuficienteException {
+        <<exception>>
+    }
+
+    class NotificacaoEmailService {
+        <<service>>
         +notificarRecebimentoMoeda(envio: EnvioMoeda) void
         +notificarCupomResgate(resgate: Resgate) void
         +notificarParceiro(resgate: Resgate) void
     }
 
-    Usuario <|-- Aluno
-    Usuario <|-- Professor
-    Usuario <|-- EmpresaParceira
     Transacao <|-- EnvioMoeda
     Transacao <|-- Resgate
 
@@ -86,5 +96,7 @@ classDiagram
     Aluno "1" --> "*" EnvioMoeda : recebe
     Resgate "*" --> "1" Vantagem : refere-se a
 
-    EnvioMoeda ..> NotificacaoEmail : notifica
-    Resgate ..> NotificacaoEmail : notifica
+    Professor ..> SaldoInsuficienteException : lança
+    Aluno ..> SaldoInsuficienteException : lança
+    NotificacaoEmailService ..> EnvioMoeda : notifica
+    NotificacaoEmailService ..> Resgate : notifica

@@ -121,17 +121,21 @@ atores. Setas sólidas são associações ator↔caso de uso; setas tracejadas s
 
 **Observações sobre o diagrama:**
 
-- `Usuario` é uma classe abstrata com login/senha e autenticação; `Aluno`, `Professor` e
-  `EmpresaParceira` herdam dela, já que os três atores autenticam-se do mesmo jeito.
+- **Atualizado na Sprint 3:** a classe abstrata `Usuario` do modelo original foi removida.
+  `Aluno`, `Professor` e `EmpresaParceira` são entidades independentes, cada uma com seus
+  próprios `login`/`senha` e `autenticar()` (BCrypt) — simplificação adotada para evitar
+  herança de tabelas no ORM; o diagrama agora reflete o código.
 - `Transacao` é uma classe abstrata que generaliza `EnvioMoeda` (professor → aluno) e
   `Resgate` (aluno → vantagem), refletindo o extrato único mencionado no enunciado
   ("transações que realizou").
-- `NotificacaoEmail` é a classe de integração com o serviço externo de e-mail (ator
-  secundário do caso de uso), acionada por `EnvioMoeda` e `Resgate`.
+- `NotificacaoEmailService` (antes `NotificacaoEmail`) é o serviço que notifica o recebimento
+  de moedas e envia o cupom ao aluno e à empresa; nesta versão o e-mail é **simulado** (log),
+  sem SMTP real. `SaldoInsuficienteException` é lançada quando o saldo não cobre o envio/resgate.
+- `Transacao.data` é `LocalDate` e os identificadores são `Long`, como nas entidades JPA.
 - `Instituicao` aparece apenas como dado associado a `Aluno`/`Professor`, sem casos de uso
   de cadastro próprios (ver observação no diagrama de casos de uso).
-- Os atributos e assinaturas de métodos aqui modelados são os que serão implementados como
-  stubs (métodos vazios) no projeto Java desta sprint.
+- Todos os métodos modelados estão implementados nas entidades (regras que só usam objetos em
+  memória) ou orquestrados pelos Services (persistência).
 
 **Para editar este diagrama:** mesmo fluxo do diagrama de caso de uso — o fonte é
 [docs/diagrama-classes.mmd](docs/diagrama-classes.mmd) (sintaxe
@@ -146,13 +150,14 @@ para visualizar/exportar o PNG novamente.
 
 - A arquitetura segue o padrão **MVC** exigido a partir da Sprint 02: Camada de
   Apresentação (View), Camada de Aplicação (Controllers), Camada de Domínio (Services) e
-  Camada de Persistência (DAO).
-- `ServicoMoedas` e `ServicoVantagens` concentram as regras de negócio (saldo, crédito
-  semestral, desconto ao resgatar) e delegam a persistência aos componentes DAO.
-- `ServicoNotificacao` isola a integração com o Serviço de E-mail externo, reutilizado
-  tanto pelo fluxo de envio de moedas quanto pelo de resgate de vantagens.
-- Os componentes DAO encapsulam o acesso ao Banco de Dados, antecipando a estratégia de
-  persistência (ORM/DAO) que será detalhada na Sprint 02.
+  Camada de Persistência (Repository/DAO).
+- **Atualizado na Sprint 3** para refletir o código: cada Controller delega a um Service
+  (`AlunoService`, `MoedaService`, `ResgateService`, `AuthService`...), e os Services acessam
+  os `Repository` do Spring Data JPA (DAO) sobre o banco H2.
+- `MoedaService` e `ResgateService` concentram as regras de saldo e de resgate;
+  `NotificacaoEmailService` é reutilizado pelos dois fluxos e registra o e-mail em log
+  (envio simulado, sem SMTP).
+- A autenticação é feita por `AuthInterceptor` + `AuthService` (sessão HTTP).
 
 **Para editar este diagrama:** mesmo fluxo dos diagramas anteriores — o fonte é
 [docs/diagrama-componentes.mmd](docs/diagrama-componentes.mmd) (sintaxe
@@ -198,9 +203,8 @@ Projeto Java com **Spring Boot** em [app/](app/), usando:
 - **Arquitetura MVC**: `Controller` (Spring MVC) → `Service` (regra de negócio) →
   `Repository` (DAO/ORM) → banco; a View é renderizada em **Thymeleaf**, no próprio
   Spring Boot (sem front-end separado nesta sprint).
-- Métodos do diagrama de classes que não fazem parte do CRUD desta sprint (`autenticar()`,
-  `consultarExtrato()`, `enviarMoedas()`, etc.) estão presentes como **stubs** nas
-  entidades, mantendo o alinhamento entre modelo e código.
+- Os métodos do diagrama de classes (`autenticar()`, `consultarExtrato()`, `enviarMoedas()`,
+  etc.) estão implementados nas entidades, mantendo o alinhamento entre modelo e código.
 
 ## CRUDs (versão final)
 
